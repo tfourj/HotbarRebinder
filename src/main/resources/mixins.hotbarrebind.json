@@ -5,6 +5,8 @@
   "package": "com.tfourj.hotbarrebind.mixin",
   "refmap": "mixins.hotbarrebind.refmap.json",
   "client": [
-    "GuiContainerInvoker"
+    "GuiContainerInvoker",
+    "GuiScreenMixin",
+    "MinecraftMixin"
   ]
 }
