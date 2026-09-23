@@ -12,8 +12,8 @@ Assign the nine additional binds under **Options > Controls > Hotbar Rebind**. A
 Keyboard keys and mouse buttons are supported. As with vanilla number-key swaps, the inventory action only works when
 the cursor is not carrying an item.
 
-The mod uses Forge input events and a Sponge Mixin invoker to call each container screen's own vanilla click handler.
-Mixin is bundled in the mod JAR, so no additional dependency is required.
+The mod uses Sponge Mixins for game-tick, keyboard, and mouse handling. A Mixin invoker calls each container screen's
+own vanilla click handler. Mixin is bundled in the mod JAR, so no additional dependency is required.
 
 ## Build
 
