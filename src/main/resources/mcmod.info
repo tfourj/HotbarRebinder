@@ -1,7 +1,7 @@
 [{
   "modid": "hotbarrebind",
   "name": "Hotbar Rebind",
-  "description": "Gives aditional binding options for hotbar.",
+  "description": "Adds configurable hotbar binds that also work while hovering inventory items.",
   "version": "3.0.0",
   "mcversion": "1.8.9",
   "authorList": ["TfourJ"]
