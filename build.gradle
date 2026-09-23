@@ -36,7 +36,7 @@ minecraft {
     version = "1.8.9-11.15.1.2318-1.8.9"
     runDir = "run"
     mappings = "stable_22"
-    clientRunArgs += ['--tweakClass', 'org.spongepowered.asm.launch.MixinTweaker']
+    clientRunArgs += ['--tweakClass', 'com.tfourj.hotbarrebind.launch.HotbarRebindTweaker']
 }
 
 mixin {
@@ -56,8 +56,7 @@ jar {
         attributes(
             'FMLCorePlugin': 'com.tfourj.hotbarrebind.launch.HotbarRebindLoadingPlugin',
             'FMLCorePluginContainsFMLMod': 'true',
-            'MixinConfigs': 'mixins.hotbarrebind.json',
-            'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
+            'TweakClass': 'com.tfourj.hotbarrebind.launch.HotbarRebindTweaker',
             'TweakOrder': '0'
         )
     }
