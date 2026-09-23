@@ -18,3 +18,16 @@ own vanilla click handler. Mixin is bundled in the mod JAR, so no additional dep
 ## Build
 
 Build with Java 8 by running `gradlew build`. The reobfuscated mod JAR is written to `build/libs`.
+
+## Run in IntelliJ IDEA
+
+Generate the IDEA project with Java 8 by running `gradlew idea`, then use the `Minecraft Client` application
+configuration. Its important settings are:
+
+- JRE: Java 8
+- Main class: `GradleStart`
+- Program arguments: `--tweakClass com.tfourj.hotbarrebind.launch.HotbarRebindTweaker`
+- Working directory: the project's `run` directory
+
+If IDEA kept an older duplicate `Minecraft Client` configuration, delete it or add the program arguments above. A
+working launch prints `Loading tweak class name com.tfourj.hotbarrebind.launch.HotbarRebindTweaker` in the console.
