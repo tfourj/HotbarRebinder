@@ -1,11 +1,14 @@
 package com.tfourj.hotbarrebind;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.inventory.Slot;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -13,6 +16,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 
 @Mod(
     modid = HotbarRebind.MODID,
@@ -27,6 +31,7 @@ public class HotbarRebind {
     public static final String VERSION = "3.0.0";
 
     private static final int HOTBAR_SIZE = 9;
+    private static final int HOTBAR_SWAP_CLICK_TYPE = 2;
     private static final String KEY_CATEGORY = "key.categories.hotbarrebind";
 
     private final KeyBinding[] hotbarKeys = new KeyBinding[HOTBAR_SIZE];
@@ -53,15 +58,82 @@ public class HotbarRebind {
         }
 
         Minecraft minecraft = Minecraft.getMinecraft();
-        if (minecraft.thePlayer == null || minecraft.currentScreen != null) {
+        for (int slot = 0; slot < HOTBAR_SIZE; slot++) {
+            if (hotbarKeys[slot].isPressed()) {
+                if (minecraft.thePlayer != null && minecraft.currentScreen == null) {
+                    minecraft.thePlayer.inventory.currentItem = slot;
+                }
+                break;
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onGuiKeyboardInput(GuiScreenEvent.KeyboardInputEvent.Pre event) {
+        if (!(event.gui instanceof GuiContainer) || !Keyboard.getEventKeyState()) {
             return;
         }
 
+        int eventKey = Keyboard.getEventKey();
+        if (eventKey == Keyboard.KEY_NONE) {
+            eventKey = Keyboard.getEventCharacter() + 256;
+        }
+
+        handleGuiBinding(event, eventKey);
+    }
+
+    @SubscribeEvent
+    public void onGuiMouseInput(GuiScreenEvent.MouseInputEvent.Pre event) {
+        if (!(event.gui instanceof GuiContainer) || !Mouse.getEventButtonState()) {
+            return;
+        }
+
+        int mouseButton = Mouse.getEventButton();
+        if (mouseButton >= 0) {
+            handleGuiBinding(event, mouseButton - 100);
+        }
+    }
+
+    private void handleGuiBinding(GuiScreenEvent event, int keyCode) {
+        int hotbarSlot = findHotbarSlot(keyCode);
+        if (hotbarSlot < 0) {
+            return;
+        }
+
+        moveHoveredSlot((GuiContainer) event.gui, hotbarSlot);
+        event.setCanceled(true);
+    }
+
+    private int findHotbarSlot(int keyCode) {
+        if (keyCode == Keyboard.KEY_NONE) {
+            return -1;
+        }
+
         for (int slot = 0; slot < HOTBAR_SIZE; slot++) {
-            if (hotbarKeys[slot].isPressed()) {
-                minecraft.thePlayer.inventory.currentItem = slot;
-                break;
+            if (hotbarKeys[slot].getKeyCode() == keyCode) {
+                return slot;
             }
+        }
+
+        return -1;
+    }
+
+    private void moveHoveredSlot(GuiContainer container, int hotbarSlot) {
+        Minecraft minecraft = Minecraft.getMinecraft();
+        if (minecraft.thePlayer == null || minecraft.playerController == null
+            || minecraft.thePlayer.inventory.getItemStack() != null) {
+            return;
+        }
+
+        Slot hoveredSlot = container.getSlotUnderMouse();
+        if (hoveredSlot != null) {
+            minecraft.playerController.windowClick(
+                container.inventorySlots.windowId,
+                hoveredSlot.slotNumber,
+                hotbarSlot,
+                HOTBAR_SWAP_CLICK_TYPE,
+                minecraft.thePlayer
+            );
         }
     }
 
