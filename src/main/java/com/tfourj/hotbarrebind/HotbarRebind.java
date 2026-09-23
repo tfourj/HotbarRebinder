@@ -1,5 +1,7 @@
 package com.tfourj.hotbarrebind;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.settings.KeyBinding;
@@ -15,6 +17,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
@@ -33,6 +36,15 @@ public class HotbarRebind {
     private static final int HOTBAR_SIZE = 9;
     private static final int HOTBAR_SWAP_CLICK_TYPE = 2;
     private static final String KEY_CATEGORY = "key.categories.hotbarrebind";
+    private static final Method HANDLE_MOUSE_CLICK = ReflectionHelper.findMethod(
+        GuiContainer.class,
+        (GuiContainer) null,
+        new String[] {"handleMouseClick", "func_146984_a"},
+        Slot.class,
+        int.class,
+        int.class,
+        int.class
+    );
 
     private final KeyBinding[] hotbarKeys = new KeyBinding[HOTBAR_SIZE];
 
@@ -127,13 +139,23 @@ public class HotbarRebind {
 
         Slot hoveredSlot = container.getSlotUnderMouse();
         if (hoveredSlot != null) {
-            minecraft.playerController.windowClick(
-                container.inventorySlots.windowId,
+            invokeHotbarSwap(container, hoveredSlot, hotbarSlot);
+        }
+    }
+
+    private void invokeHotbarSwap(GuiContainer container, Slot hoveredSlot, int hotbarSlot) {
+        try {
+            HANDLE_MOUSE_CLICK.invoke(
+                container,
+                hoveredSlot,
                 hoveredSlot.slotNumber,
                 hotbarSlot,
-                HOTBAR_SWAP_CLICK_TYPE,
-                minecraft.thePlayer
+                HOTBAR_SWAP_CLICK_TYPE
             );
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException("Could not access the container click handler", e);
+        } catch (InvocationTargetException e) {
+            throw new IllegalStateException("Container click handler failed", e.getCause());
         }
     }
 
