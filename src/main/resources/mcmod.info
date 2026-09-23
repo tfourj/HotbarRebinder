@@ -4,5 +4,6 @@
   "description": "Adds configurable hotbar binds that also work while hovering inventory items.",
   "version": "3.0.0",
   "mcversion": "1.8.9",
+  "logoFile": "hotbarrebinder.png",
   "authorList": ["TfourJ"]
 }]
