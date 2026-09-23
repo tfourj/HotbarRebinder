@@ -1,0 +1,10 @@
+{
+  "required": true,
+  "minVersion": "0.7.11",
+  "compatibilityLevel": "JAVA_8",
+  "package": "com.tfourj.hotbarrebind.mixin",
+  "refmap": "mixins.hotbarrebind.refmap.json",
+  "client": [
+    "GuiContainerInvoker"
+  ]
+}

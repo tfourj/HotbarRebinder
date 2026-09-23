@@ -2,20 +2,63 @@ buildscript {
     repositories {
         mavenCentral()
         maven { url = "https://maven.minecraftforge.net" }
+        maven { url = "https://repo.spongepowered.org/repository/maven-public" }
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+        classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
     }
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'org.spongepowered.mixin'
 version = "3.0.0"
 group = "com.tfourj.hotbarrebind"
 archivesBaseName = "Hotbar Rebind"
 sourceCompatibility = targetCompatibility = '1.8'
 
+repositories {
+    maven { url = "https://repo.spongepowered.org/repository/maven-public" }
+}
+
+configurations {
+    embed
+    compile.extendsFrom(embed)
+}
+
+dependencies {
+    embed('org.spongepowered:mixin:0.7.11-SNAPSHOT') {
+        transitive = false
+    }
+}
+
 minecraft {
     version = "1.8.9-11.15.1.2318-1.8.9"
     runDir = "run"
     mappings = "stable_22"
+    clientRunArgs += ['--tweakClass', 'org.spongepowered.asm.launch.MixinTweaker']
+}
+
+mixin {
+    add sourceSets.main, 'mixins.hotbarrebind.refmap.json'
+    defaultObfuscationEnv searge
+    disableRefMapWarning = true
+}
+
+jar {
+    from {
+        configurations.embed.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
+
+    manifest {
+        attributes(
+            'FMLCorePlugin': 'com.tfourj.hotbarrebind.launch.HotbarRebindLoadingPlugin',
+            'FMLCorePluginContainsFMLMod': 'true',
+            'MixinConfigs': 'mixins.hotbarrebind.json',
+            'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
+            'TweakOrder': '0'
+        )
+    }
 }
