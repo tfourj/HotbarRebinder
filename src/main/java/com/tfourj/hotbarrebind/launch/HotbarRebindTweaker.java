@@ -1,10 +1,14 @@
 package com.tfourj.hotbarrebind.launch;
 
 import java.io.File;
+import java.net.URISyntaxException;
+import java.security.CodeSource;
 import java.util.List;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
-import org.spongepowered.asm.launch.MixinTweaker;
+import net.minecraftforge.fml.relauncher.CoreModManager;
+import org.spongepowered.asm.launch.MixinBootstrap;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.Mixins;
 
 /**
@@ -16,30 +20,39 @@ import org.spongepowered.asm.mixin.Mixins;
  * the same bootstrap path.</p>
  */
 public final class HotbarRebindTweaker implements ITweaker {
-    private final MixinTweaker delegate;
-
-    public HotbarRebindTweaker() {
-        delegate = new MixinTweaker();
-        Mixins.addConfiguration("mixins.hotbarrebind.json");
-    }
-
     @Override
     public void acceptOptions(List<String> args, File gameDir, File assetsDir, String profile) {
-        delegate.acceptOptions(args, gameDir, assetsDir, profile);
     }
 
     @Override
     public void injectIntoClassLoader(LaunchClassLoader classLoader) {
-        delegate.injectIntoClassLoader(classLoader);
+        MixinBootstrap.init();
+        Mixins.addConfiguration("mixins.hotbarrebind.json");
+        MixinEnvironment.getDefaultEnvironment().setObfuscationContext("searge");
+        MixinEnvironment.getDefaultEnvironment().setSide(MixinEnvironment.Side.CLIENT);
+
+        CodeSource codeSource = getClass().getProtectionDomain().getCodeSource();
+        if (codeSource == null) {
+            throw new IllegalStateException("Cannot determine the Hotbar Rebind mod location");
+        }
+
+        try {
+            File file = new File(codeSource.getLocation().toURI());
+            if (file.isFile()) {
+                CoreModManager.getIgnoredMods().remove(file.getName());
+            }
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException("Invalid Hotbar Rebind mod location", e);
+        }
     }
 
     @Override
     public String getLaunchTarget() {
-        return delegate.getLaunchTarget();
+        return "net.minecraft.client.main.Main";
     }
 
     @Override
     public String[] getLaunchArguments() {
-        return delegate.getLaunchArguments();
+        return new String[0];
     }
 }
