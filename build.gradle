@@ -12,7 +12,7 @@ buildscript {
 
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'org.spongepowered.mixin'
-version = "3.0.0"
+version = "3.0.1"
 group = "com.tfourj.hotbarrebind"
 archivesBaseName = "Hotbar Rebind"
 sourceCompatibility = targetCompatibility = '1.8'
@@ -54,11 +54,11 @@ jar {
 
     manifest {
         attributes(
-            'FMLCorePlugin': 'com.tfourj.hotbarrebind.launch.HotbarRebindLoadingPlugin',
-            'FMLCorePluginContainsFMLMod': 'true',
             'MixinConfigs': 'mixins.hotbarrebind.json',
+            'ModSide': 'CLIENT',
             'TweakClass': 'com.tfourj.hotbarrebind.launch.HotbarRebindTweaker',
-            'TweakOrder': '0'
+            'TweakOrder': '0',
+            'ForceLoadAsMod': 'true'
         )
     }
 }
