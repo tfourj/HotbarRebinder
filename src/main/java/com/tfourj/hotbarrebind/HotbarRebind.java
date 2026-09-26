@@ -9,8 +9,12 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.inventory.Slot;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import org.lwjgl.input.Keyboard;
 
@@ -31,19 +35,41 @@ public class HotbarRebind {
     private static final String KEY_CATEGORY = "key.categories.hotbarrebind";
 
     private static final KeyBinding[] HOTBAR_KEYS = new KeyBinding[HOTBAR_SIZE];
+    private KeybindConfig keybindConfig;
+
+    @Mod.EventHandler
+    public void preInit(FMLPreInitializationEvent event) {
+        Minecraft minecraft = Minecraft.getMinecraft();
+        keybindConfig = KeybindConfig.load(
+            event.getModConfigurationDirectory(),
+            minecraft.mcDataDir,
+            HOTBAR_SIZE,
+            event.getModLog()
+        );
+    }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
+        MinecraftForge.EVENT_BUS.register(this);
         ClientCommandHandler.instance.registerCommand(new TestCommand());
 
         for (int slot = 0; slot < HOTBAR_SIZE; slot++) {
             HOTBAR_KEYS[slot] = new KeyBinding(
                 "key.hotbarrebind.slot." + (slot + 1),
-                Keyboard.KEY_NONE,
+                keybindConfig.getKeyCode(slot),
                 KEY_CATEGORY
             );
             ClientRegistry.registerKeyBinding(HOTBAR_KEYS[slot]);
         }
+    }
+
+    @SubscribeEvent
+    public void saveKeybinds(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) {
+            return;
+        }
+
+        keybindConfig.saveIfChanged(HOTBAR_KEYS);
     }
 
     public static int consumePressedHotbarSlot() {
