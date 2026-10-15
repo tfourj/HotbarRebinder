@@ -39,6 +39,18 @@ minecraft {
     clientRunArgs += ['--tweakClass', 'com.tfourj.hotbarrebind.launch.HotbarRebindTweaker']
 }
 
+processResources {
+    inputs.property "version", project.version
+
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+        expand 'version': project.version
+    }
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
 mixin {
     add sourceSets.main, 'mixins.hotbarrebind.refmap.json'
     defaultObfuscationEnv searge
