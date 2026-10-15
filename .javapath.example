@@ -1,0 +1,2 @@
+# Copy to .javapath and set the Java 8 JDK folder used by gradlew.bat
+C:\Program Files\Eclipse Adoptium\jdk-8.0.432.6-hotspot
